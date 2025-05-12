@@ -1,0 +1,332 @@
+<%- include('partials/header') %>
+
+    <link rel="stylesheet" href="main.css">
+
+    <style>
+        /* Cấu hình chung */
+        .container {
+            padding-top: 30px;
+        }
+
+        /* Sidebar bên trái (Bộ lọc sản phẩm) */
+        .store-page .sidebar {
+            background-color: white;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            height: fit-content;
+            flex: 0 0 25%;
+            /* Chiếm 25% chiều rộng */
+        }
+
+        /* Các phần bộ lọc */
+        .store-page .filter-section {
+            margin-bottom: 20px;
+        }
+
+        .store-page .filter-section h5 {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .store-page .filter-section ul li a {
+            color: #333;
+            text-decoration: none;
+        }
+
+        .store-page .filter-section ul li a:hover {
+            color: #d10000;
+        }
+
+        /* Nội dung sản phẩm bên phải */
+        .store-page .col-md-9 {
+            flex: 0 0 75%;
+            /* Chiếm 75% chiều rộng */
+            padding: 20px;
+        }
+
+        /* Card sản phẩm */
+        .product-card {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            height: 400px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            text-decoration: none;
+            border-radius: 10px;
+        }
+
+        /* Hình ảnh sản phẩm */
+        .thumbnail.product-box {
+            flex: 1;
+            /* Đảm bảo card sản phẩm có chiều cao bằng nhau */
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+            padding: 10px;
+            position: relative;
+        }
+
+        .product-image {
+            width: 100%;
+            height: 220px !important;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        /* Phần mô tả sản phẩm */
+        .caption {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .caption h3 {
+            font-size: 18px;
+            margin: 10px 0 5px 0;
+            font-weight: bold;
+        }
+
+        /* Đánh giá sản phẩm */
+        .rating {
+            margin: 5px 0;
+        }
+
+        .star {
+            font-size: 18px;
+            color: #ccc;
+        }
+
+        .star.filled,
+        .star.half {
+            color: gold;
+        }
+
+        /* Phần chọn sắp xếp */
+        /* Container chứa phần sắp xếp */
+        .store-page .d-flex.justify-content-end {
+            display: flex;
+            justify-content: flex-end;
+            /* Căn chỉnh phần tử sang bên phải */
+            align-items: center;
+            /* Căn giữa theo chiều dọc */
+            margin-bottom: 20px;
+            /* Khoảng cách giữa phần sắp xếp và sản phẩm */
+        }
+
+        /* Phần sắp xếp (select) */
+        .store-page select.form-control {
+            width: 200px;
+            padding: 5px 10px;
+            font-size: 14px;
+            margin-left: 10px;
+            /* Khoảng cách giữa label và select */
+        }
+
+        .store-page label {
+            font-size: 16px;
+            margin-right: 10px;
+            /* Khoảng cách giữa label và select */
+            display: inline-block;
+            /* Đảm bảo label nằm cạnh select */
+            align-self: center;
+        }
+
+        select {
+            appearance: none;
+            /* Thuộc tính chung */
+        }
+
+        .filter-section {
+  margin-bottom: 20px;
+}
+
+.category-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px; /* Khoảng cách giữa các mục */
+}
+
+.category-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  text-decoration: none;
+  color: #333;
+  background-color: #f8f8f8;
+  transition: all 0.3s ease;
+}
+
+.category-item:hover {
+  background-color: #e0e0e0;
+}
+
+.category-item.active {
+  background-color: #950012; /* Màu đỏ giống John Henry */
+  color: #fff;
+  font-weight: bold;
+}
+
+    </style>
+
+    <div class="container store-page">
+        <nav aria-label="breadcrumb" class="breadcrumb-container">
+            <ul class="breadcrumb" style="background-color: transparent;">
+                <li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
+                <li class="breadcrumb-item active"><a href="/store">Danh mục</a></li>
+            </ul>
+        </nav>
+        <div class="row">
+
+
+            <div class="d-flex justify-content-between">
+                <!-- Sidebar bên trái (lọc sản phẩm) -->
+                <div class="col-md-3 sidebar">
+                    <h4>Bộ lọc</h4>
+                    <form action="/store" method="GET">
+                        <!-- Các bộ lọc như trong mã của bạn -->
+                        <div class="filter-section">
+                            <h5>Danh mục</h5>
+                            <div class="category-group">
+                              <a href="/store" class="category-item">
+                                <span>Tất cả</span>
+                              </a>
+                              <a href="/store?category=Áo" class="category-item">
+                                <span>Áo</span>
+                              </a>
+                              <a href="/store?category=Quần" class="category-item">
+                                <span>Quần</span>
+                              </a>
+                            </div>
+                          </div>
+                          
+
+                        <div class="filter-section">
+                            <h5>Khoảng giá</h5>
+                            <form action="/store" method="GET">
+                                <div class="form-group">
+                                    <label for="minPrice">Giá tối thiểu</label>
+                                    <input 
+                                        type="number" 
+                                        id="minPrice" 
+                                        name="minPrice" 
+                                        class="form-control" 
+                                        placeholder="Nhập giá tối thiểu" 
+                                        value="<%= minPrice %>" 
+                                        onchange="this.form.submit()">
+                                </div>
+                                <div class="form-group">
+                                    <label for="maxPrice">Giá tối đa</label>
+                                    <input 
+                                        type="number" 
+                                        id="maxPrice" 
+                                        name="maxPrice" 
+                                        class="form-control" 
+                                        placeholder="Nhập giá tối đa" 
+                                        value="<%= maxPrice %>" 
+                                        onchange="this.form.submit()">
+                                </div>
+                            </form>
+                        </div>
+                </div>
+
+                <!-- Phần chọn sắp xếp -->
+                <div class="col-md-9">
+                    <div class="d-flex justify-content-end">
+                        <select id="sort-select" class="form-control" onchange="location = this.value;"
+                            style="border-radius: 20px;">
+                            <option value="" disabled selected style="display: none;">Sắp xếp theo</option>
+                            <option value="/store?sort=price_asc">Giá tăng dần</option>
+                            <option value="/store?sort=price_desc">Giá giảm dần</option>
+                            <option value="/store?sort=newest">Mới nhất</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            </form>
+
+            <!-- Nội dung bên phải: Hiển thị danh sách sản phẩm -->
+            <div class="row">
+                <% products.forEach(function(product) { %>
+                    <div class="col-md-3">
+                        <a href="/products/<%= product._id %>" class="product-card">
+                            <div class="thumbnail product-box">
+                                <img src="<%= product.image %>" alt="<%= product.name %>" class="product-image">
+                                <div class="caption">
+                                    <h3>
+                                        <%= product.name %>
+                                    </h3>
+
+                                    <div class="rating">
+                                        <% for (let i=0; i < Math.floor(product.rating); i++) { %>
+                                            <span class="star filled">&#9733;</span>
+                                            <% } %>
+
+                                                <% if (product.rating % 1 !==0) { %>
+                                                    <span class="star half">&#9733;</span>
+                                                    <% } %>
+
+                                                        <% for (let i=Math.ceil(product.rating); i < 5; i++) { %>
+                                                            <span class="star">&#9734;</span>
+                                                            <% } %>
+                                        <span
+                                        style="font-size: 13px; color: gray; margin-left: 5px;">
+                                        (<%= product.reviews ? product.reviews.length : 0 %>)
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- Hiển thị giá -->
+                                <% if (product.saleprice) { %> <!-- Nếu có saleprice -->
+                                    <div class="price original-price"
+                                        style="font-size: 14px; color: gray; text-decoration: line-through;bottom: 30px;">
+                                        <%= (product.price).toLocaleString('vi-VN') %> ₫
+                                    </div>
+
+                                    <div class="price sale-price">
+                                        <%= (product.saleprice).toLocaleString('vi-VN') %> ₫
+                                    </div>
+                                    <% } else { %>
+                                        <div class="price">
+                                            <%= (product.price).toLocaleString('vi-VN') %> ₫
+                                        </div>
+                                        <% } %>
+                            </div>
+                        </a>
+                    </div>
+                    <% }) %>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updatePriceValue() {
+            var minPrice = document.getElementById('min-price').value;
+            var maxPrice = document.getElementById('max-price').value;
+
+            document.getElementById('min-price-value').innerText = minPrice;
+            document.getElementById('max-price-value').innerText = maxPrice;
+
+            // Tự động cập nhật giá trị của các input hidden khi người dùng thay đổi
+            document.getElementById('min-price').value = minPrice;
+            document.getElementById('max-price').value = maxPrice;
+        }
+    </script>
+
+    <%- include('partials/footer') %>
+        <%- include('./partials/closingtags') %>

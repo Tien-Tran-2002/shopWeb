@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <style>
+        /* Sidebar */
+        .sidebar {
+            height: 100vh;
+            width: 220px;
+            position: fixed;
+            background-color: #2c3e50;
+            padding-top: 20px;
+            color: #fff;
+        }
+
+        .sidebar a {
+            display: block;
+            color: #ecf0f1;
+            padding: 12px 20px;
+            text-decoration: none;
+        }
+
+        .sidebar a:hover {
+            background-color: #34495e;
+        }
+
+        /* Main content */
+        .main-content {
+            margin-left: 230px;
+            padding: 20px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            /* Ẩn modal mặc định */
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+            /* Độ mờ nền */
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 50%;
+        }
+
+        /* Close button */
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            /* Để các box xuống dòng khi hết chỗ */
+            gap: 20px;
+            /* Khoảng cách giữa các box */
+        }
+
+        .product-card {
+            height: 300px;
+            /* Chiều cao cố định */
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .comments-container div {
+            display: flex;
+            /* Đặt flex layout cho các bình luận */
+            flex-direction: column;
+            /* Sắp xếp các phần tử theo chiều dọc */
+        }
+
+        .comments-container .btn {
+            align-self: flex-end;
+            /* Đẩy nút về cuối cùng */
+            margin-top: 10px;
+            /* Khoảng cách trên giữa bình luận và nút */
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .table th,
+        .table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        .table-striped tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h3 class="text-center">Admin Panel</h3>
+        <a href="#" onclick="toggleProductManagement()">📦 Quản lý sản phẩm</a>
+        <a href="#" id="openAddModal">➕ Thêm sản phẩm</a>
+        <a href="#" onclick="toggleUserManagement()">👥 Quản lý người dùng</a>
+        <a href="#" onclick="toggleOrderManagement()">📝 Quản lý đơn hàng</a>
+        <a href="/auth/logout">🚪 Đăng xuất</a>
+    </div>
+
+    <div id="product-management">
+        <!-- Main Content -->
+        <div class="main-content">
+            <h1>Dashboard - Quản lý sản phẩm</h1>
+            <!-- Search bar -->
+            <form method="GET" action="/admin/dashboard" class="search-bar form-inline">
+                <input type="text" name="search" placeholder="Tìm kiếm sản phẩm" value="<%= search %>"
+                    class="form-control">
+                <button type="submit" class="btn btn-info">🔍 Tìm kiếm</button>
+            </form>
+
+            <!-- Product list -->
+            <div class="row">
+                <% if (products.length===0) { %>
+                    <p>Không tìm thấy sản phẩm nào.</p>
+                    <% } else { %>
+                        <% products.forEach(product=> { %>
+                            <div class="col-sm-6 col-md-4">
+                                <div class="product-card">
+                                    <h3>
+                                        <%= product.name %>
+                                    </h3>
+                                    <p><strong>Mô tả:</strong>
+                                        <%= product.description %>
+                                    </p>
+                                    <p><strong>Giá:</strong>
+                                        <%= (product.price).toLocaleString('vi-VN') %> ₫
+                                    </p>
+                                    <% if (product.saleprice) { %> <!-- Kiểm tra nếu có saleprice -->
+                                        <p><strong>Giá khuyến mãi:</strong>
+                                            <%= (product.saleprice).toLocaleString('vi-VN') %> ₫
+                                        </p>
+                                    <% } %>
+                                    <div class="actions">
+                                        <button class="btn btn-primary btn-sm editButton"
+                                            data-product-id="<%= product._id %>">✏️ Cập nhật</button>
+                                        <a href="/admin/products/delete/<%= product._id %>"
+                                            class="btn btn-danger btn-sm"
+                                            onclick="return confirm('Bạn có chắc muốn xoá sản phẩm này?');">🗑️ Xoá</a>
+                                        <button class="btn btn-primary btn-sm"
+                                            onclick="openComments('<%= product._id %>')">🗨️ Bình luận</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <% }) %>
+                                <% } %>
+            </div>
+        </div>
+
+        <!-- Modal: Thêm sản phẩm -->
+        <div id="addModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Thêm sản phẩm mới</h2>
+                <form id="addForm" action="/admin/products/new" method="POST">
+                    <div class="form-group">
+                        <label for="addName">Tên sản phẩm:</label>
+                        <input type="text" class="form-control" name="name" id="addName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="addDescription">Mô tả:</label>
+                        <textarea class="form-control" name="description" id="addDescription" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="addPrice">Giá:</label>
+                        <input type="number" class="form-control" name="price" id="addPrice" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="addImage">Hình ảnh:</label>
+                        <input type="text" class="form-control" name="image" id="addImage" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="addCategory">Danh mục:</label>
+                        <select class="form-control" id="addCategory" name="category" required>
+                            <option value="Áo">Áo</option>
+                            <option value="Quần">Quần</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="addSale">Khuyến mãi:</label>
+                        <input type="text" class="form-control" name="saleprice" id="addSale">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Thêm sản phẩm</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Modal: Cập nhật sản phẩm -->
+        <div id="editModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Sửa sản phẩm</h2>
+                <form id="editForm" action="/admin/products/edit/" method="POST">
+                    <div class="form-group">
+                        <label for="editName">Tên sản phẩm:</label>
+                        <input type="text" class="form-control" name="name" id="editName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editDescription">Mô tả:</label>
+                        <textarea class="form-control" name="description" id="editDescription" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="editPrice">Giá:</label>
+                        <input type="number" class="form-control" name="price" id="editPrice" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editImage">Hình ảnh:</label>
+                        <input type="text" class="form-control" name="image" id="editImage" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editCategory">Danh mục:</label>
+                        <select class="form-control" id="editCategory" name="category" required>
+                            <option value="Áo">Áo</option>
+                            <option value="Quần">Quần</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editSale">Khuyến mãi:</label>
+                        <input type="text" class="form-control" name="saleprice" id="editSale">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Cập nhật sản phẩm</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Modal: Sửa Comment -->
+        <div class="modal" id="commentModal" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Bình luận sản phẩm</h5>
+                        <button type="button" class="close" onclick="closeComments()">&times;</button>
+                    </div>
+                    <div class="modal-body" id="commentsContainer">
+                        <!-- Comment list will be loaded here via JS -->
+                        <div class="text-center">Đang tải bình luận...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Danh sách người dùng -->
+    <div class="main-content">
+        <div id="user-management" style="display: none;">
+            <h4>Quản lý người dùng</h4>
+            <button onclick="openAddModal()" class="btn btn-primary">Thêm người dùng</button>
+            <table class="table table-striped" id="user-table">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Danh sách người dùng sẽ hiển thị ở đây -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Modal: Sửa người dùng -->
+        <div id="editUserModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close" onclick="closeEditModal()">&times;</span>
+                <h4>Chỉnh sửa người dùng</h4>
+                <form id="editUserForm">
+                    <label for="editUsername">Username:</label>
+                    <input type="text" class="form-control" id="editUsername" name="username" required><br><br>
+
+                    <label for="editEmail">Email:</label>
+                    <input type="email" class="form-control" id="editEmail" name="email" required><br><br>
+
+                    <label for="editRole">Vai trò:</label>
+                    <select class="form-control" id="editRole" name="role">
+                        <option value="user">User</option>
+                        <option value="admin">Admin</option>
+                    </select><br><br>
+
+                    <button type="button" class="btn btn-primary" onclick="saveEditedUser()">Lưu</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Modal: Thêm người dùng -->
+        <div id="addUserModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close" onclick="closeAddModal()">&times;</span>
+                <h4>Thêm người dùng mới</h4>
+                <form id="addUserForm">
+                    <label for="addUsername">Username:</label>
+                    <input type="text" class="form-control" id="addUsername" name="username" required><br><br>
+
+                    <label for="addEmail">Email:</label>
+                    <input type="email" class="form-control" id="addEmail" name="email" required><br><br>
+
+                    <label for="addPassword">Password:</label>
+                    <input type="password" class="form-control" id="addPassword" name="password" required><br><br>
+
+                    <label for="addRole">Vai trò:</label>
+                    <select class="form-control" id="addRole" name="role">
+                        <option value="user">User</option>
+                        <option value="admin">Admin</option>
+                    </select><br><br>
+
+                    <button type="button" class="btn btn-primary" onclick="saveNewUser()">Thêm</button>
+                </form>
+            </div>
+        </div>
+
+
+    </div>
+
+    <!-- Danh sách đơn hàng -->
+    <div class="main-content">
+        <div id="order-management" style="display: none;">
+            <h4>Quản lý đơn hàng</h4>
+            <table class="table table-striped" id="order-table">
+                <thead>
+                    <tr>
+                        <th>Mã Đơn Hàng</th>
+                        <th>Khách Hàng</th>
+                        <th>Email</th>
+                        <th>Tổng Tiền</th>
+                        <th>Trạng Thái</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Danh sách đơn hàng sẽ hiển thị ở đây -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Modal: Sửa đơn hàng -->
+        <div id="editOrderModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close" onclick="closeEditOrderModal()">&times;</span>
+                <h4>Chỉnh sửa đơn hàng</h4>
+                <form id="editOrderForm">
+                    <label for="editCustomerName">Khách Hàng:</label>
+                    <input type="text" class="form-control" id="editCustomerName" name="customerName" required><br><br>
+
+                    <label for="editTotalAmount">Tổng Tiền:</label>
+                    <input type="number" class="form-control" id="editTotalAmount" name="totalAmount" required><br><br>
+
+                    <label for="editOrderStatus">Trạng Thái:</label>
+                    <select class="form-control" id="editOrderStatus" name="status">
+                        <option value="pending">Chờ xử lý</option>
+                        <option value="shipped">Đã giao</option>
+                        <option value="cancelled">Đã hủy</option>
+                    </select><br><br>
+
+                    <button type="button" class="btn btn-primary" onclick="saveEditedOrder()">Lưu</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- JavaScript -->
+    <script>
+        // Lấy các phần tử modal cần thiết
+        const addModal = document.getElementById("addModal");
+        const editModal = document.getElementById("editModal");
+        const commentModal = document.getElementById("commentModal");
+        const closeButtons = document.querySelectorAll(".close");
+        const list = document.getElementById('user-list');
+
+        // Mở Modal Thêm Sản Phẩm
+        document.getElementById("openAddModal").onclick = function () {
+            addModal.style.display = "block";
+        };
+
+        // Mở Modal Sửa Sản Phẩm
+        document.querySelectorAll(".editButton").forEach(button => {
+            button.onclick = function () {
+                const productId = this.dataset.productId;
+
+                // Gọi API để lấy thông tin sản phẩm
+                fetch(`/admin/products/edit/${productId}`, { method: 'GET' })
+                    .then(response => {
+                        if (!response.ok) throw new Error("Không thể tải dữ liệu sản phẩm.");
+                        return response.json();
+                    })
+                    .then(product => {
+                        // Điền dữ liệu vào form sửa
+                        document.getElementById("editName").value = product.name;
+                        document.getElementById("editDescription").value = product.description;
+                        document.getElementById("editPrice").value = product.price;
+                        document.getElementById("editImage").value = product.image;
+                        document.getElementById("editCategory").value = product.category;
+                        document.getElementById("editSale").value = product.saleprice;
+
+                        // Cập nhật action form
+                        document.getElementById("editForm").action = `/admin/products/edit/${productId}`;
+                        editModal.style.display = "block"; // Hiển thị modal
+                    })
+                    .catch(err => {
+                        console.error("Lỗi khi tải sản phẩm:", err);
+                        alert("Không thể tải dữ liệu sản phẩm. Vui lòng thử lại.");
+                    });
+            };
+        });
+
+        // Mở Modal Bình Luận
+        function openComments(productId) {
+            const commentsContainer = document.getElementById('commentsContainer');
+            commentModal.style.display = 'block';
+            commentsContainer.innerHTML = '<p>Đang tải bình luận...</p>'; // Hiển thị trạng thái đang tải
+
+            // Gọi API để tải bình luận
+            fetch(`/admin/${productId}/comments`)
+                .then(response => {
+                    if (!response.ok) throw new Error("Không thể tải bình luận.");
+                    return response.json();
+                })
+                .then(comments => {
+                    commentsContainer.innerHTML = ''; // Xóa nội dung cũ
+
+                    if (comments.length === 0) {
+                        commentsContainer.innerHTML = '<p>Chưa có bình luận nào.</p>';
+                        return;
+                    }
+
+                    comments.forEach(comment => {
+                        const div = document.createElement('div');
+                        div.classList.add('mb-3', 'p-2', 'border', 'rounded', 'd-flex', 'flex-column'); // Sử dụng Flexbox
+
+                        div.innerHTML = `
+                        <div>
+                            <strong>${comment.userName}</strong> (${comment.rating}⭐): ${comment.comment}
+                        </div>
+                            <button onclick="deleteComment('${productId}', '${comment._id}')" class="btn btn-sm btn-danger mt-3 align-self-end">Xoá</button>
+                        `;
+
+                        commentsContainer.appendChild(div);
+                    });
+
+                })
+                .catch(err => {
+                    console.error("Lỗi khi tải bình luận:", err);
+                    commentsContainer.innerHTML = '<p>Lỗi khi tải bình luận.</p>';
+                });
+        }
+
+        // Đóng Modal Bình Luận
+        function closeComments() {
+            commentModal.style.display = "none";
+        }
+
+        // Xóa Bình Luận
+        function deleteComment(productId, commentId) {
+            if (confirm("Bạn có chắc chắn muốn xoá bình luận này?")) {
+                fetch(`/admin/${productId}/comments/${commentId}`, { method: 'DELETE' })
+                    .then(response => {
+                        if (!response.ok) throw new Error("Không thể xoá bình luận.");
+                        return response.json();
+                    })
+                    .then(() => openComments(productId)) // Tải lại danh sách bình luận
+                    .catch(err => {
+                        console.error("Lỗi khi xoá bình luận:", err);
+                        alert("Không thể xoá bình luận. Vui lòng thử lại.");
+                    });
+            }
+        }
+
+        function toggleProductManagement() {
+            document.getElementById('product-management').style.display = 'block';
+            document.getElementById('user-management').style.display = 'none';
+            document.getElementById('order-management').style.display = 'none';
+        }
+
+        function toggleUserManagement() {
+            document.getElementById('product-management').style.display = 'none';
+            document.getElementById('user-management').style.display = 'block';
+            document.getElementById('order-management').style.display = 'none';
+            loadUsers();
+
+            function loadUsers() {
+                const userTableBody = document.querySelector("#user-table tbody");
+
+                fetch('/admin/users')
+                    .then(res => {
+                        if (!res.ok) throw new Error("Không thể tải danh sách người dùng.");
+                        return res.json();
+                    })
+                    .then(users => {
+                        userTableBody.innerHTML = ''; // Xóa nội dung cũ
+
+                        if (users.length === 0) {
+                            userTableBody.innerHTML = '<tr><td colspan="3">Không có người dùng nào.</td></tr>';
+                            return;
+                        }
+
+
+                        users.forEach(user => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                    <td>${user.username}</td>
+                    <td>${user.email}</td>
+                    <td>${user.role}</td>
+                    <td>
+                        <button class="btn btn-sm btn-warning" onclick="editUser('${user._id}')">Sửa</button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteUser('${user._id}')">Xóa</button>
+                    </td>
+                `;
+                            userTableBody.appendChild(row);
+                        });
+                    })
+                    .catch(err => console.error('Lỗi khi tải danh sách người dùng:', err));
+            }
+        }
+
+        // Mở modal thêm người dùng
+        function openAddModal() {
+            const modal = document.getElementById("addUserModal");
+            modal.style.display = "block";
+        }
+
+        //Lưu người dùng mới
+        function saveNewUser() {
+            const username = document.getElementById("addUsername").value;
+            const email = document.getElementById("addEmail").value;
+            const password = document.getElementById("addPassword").value;
+            const role = document.getElementById("addRole").value;
+
+            // Gửi dữ liệu lên server
+            fetch('/admin/users', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, email, password, role })
+            })
+                .then(res => {
+                    if (!res.ok) throw new Error("Không thể thêm người dùng.");
+                    return res.json();
+                })
+                .then(() => {
+                    alert("Người dùng mới đã được thêm thành công.");
+                    closeAddModal();
+                    loadUsers(); // Làm mới danh sách người dùng
+                })
+                .catch(err => console.error("Lỗi khi thêm người dùng:", err));
+        }
+
+
+
+        // Sửa người dùng
+        function editUser(userId) {
+            // Hiển thị modal
+            const modal = document.getElementById("editUserModal");
+            modal.style.display = "block";
+
+            // Gọi API để lấy thông tin người dùng cần sửa
+            fetch(`/admin/users/${userId}`)
+                .then(res => {
+                    if (!res.ok) throw new Error("Không thể lấy thông tin người dùng.");
+                    return res.json();
+                })
+                .then(user => {
+                    // Điền dữ liệu người dùng vào modal
+                    document.getElementById("editUsername").value = user.username;
+                    document.getElementById("editEmail").value = user.email;
+                    document.getElementById("editRole").value = user.role;
+
+                    // Lưu userId vào modal để gửi khi sửa
+                    document.getElementById("editUserForm").dataset.userId = userId;
+                })
+                .catch(err => console.error("Lỗi khi lấy thông tin người dùng:", err));
+        }
+
+        // Lưu thông tin người dùng đã chỉnh sửa
+        function saveEditedUser() {
+            const form = document.getElementById("editUserForm");
+            const userId = form.dataset.userId;
+
+            const updatedUser = {
+                username: document.getElementById("editUsername").value,
+                email: document.getElementById("editEmail").value,
+                role: document.getElementById("editRole").value
+            };
+
+            // Gửi thông tin đã chỉnh sửa lên server
+            fetch(`/admin/users/${userId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(updatedUser)
+            })
+                .then(res => {
+                    if (!res.ok) throw new Error("Không thể cập nhật thông tin người dùng.");
+                    return res.json();
+                })
+                .then(() => {
+                    alert("Thông tin người dùng đã được cập nhật.");
+                    closeEditModal();
+                    loadUsers(); // Làm mới danh sách người dùng
+                })
+                .catch(err => console.error("Lỗi khi cập nhật người dùng:", err));
+        }
+
+        // Xóa người dùng
+        function deleteUser(userId) {
+            if (!confirm('Bạn có chắc muốn xóa người dùng này không?')) return;
+
+            fetch(`/admin/users/${userId}`, { method: 'DELETE' })
+                .then(res => {
+                    if (!res.ok) throw new Error('Lỗi khi xóa người dùng.');
+                    return res.json();
+                })
+                .then(() => {
+                    alert('Người dùng đã được xóa.');
+                    loadUsers(); // Cập nhật lại danh sách
+                })
+                .catch(err => console.error(err));
+        }
+
+
+        function toggleOrderManagement() {
+            document.getElementById('product-management').style.display = 'none';
+            document.getElementById('user-management').style.display = 'none';
+            document.getElementById('order-management').style.display = 'block';
+            loadOrders();
+
+            // Hàm tải danh sách đơn hàng
+            function loadOrders() {
+                const orderTableBody = document.querySelector("#order-table tbody");
+
+                fetch('/admin/orders')
+                    .then(res => {
+                        if (!res.ok) throw new Error("Không thể tải danh sách đơn hàng.");
+                        return res.json();
+                    })
+                    .then(orders => {
+                        orderTableBody.innerHTML = ''; // Xóa nội dung cũ
+
+                        if (orders.length === 0) {
+                            orderTableBody.innerHTML = '<tr><td colspan="9">Không có đơn hàng nào.</td></tr>';
+                            return;
+                        }
+
+                        orders.forEach(order => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                        <td>${order._id}</td>
+                        <td>${order.username}</td>
+                        <td>${order.email}</td>
+                        <td>${order.totalAmount.toLocaleString('vi-VN')} ₫</td>
+                        <td>${order.status}</td>
+                        <td>
+                            <button class="btn btn-sm btn-warning" onclick="editOrder('${order._id}')">Sửa</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteOrder('${order._id}')">Xóa</button>
+                        </td>
+                    `;
+                            orderTableBody.appendChild(row);
+                        });
+                    })
+                    .catch(err => console.error('Lỗi khi tải danh sách đơn hàng:', err));
+            }
+        };
+
+        // Sửa đơn hàng
+        function editOrder(orderId) {
+                // Hiển thị modal
+                const modal = document.getElementById("editOrderModal");
+                modal.style.display = "block";
+
+                // Gọi API để lấy thông tin đơn hàng cần sửa
+                fetch(`/admin/orders/${orderId}`)
+                    .then(res => {
+                        if (!res.ok) throw new Error("Không thể lấy thông tin đơn hàng.");
+                        return res.json();
+                    })
+                    .then(order => {
+                        // Điền dữ liệu đơn hàng vào modal
+                        document.getElementById("editOrderName").value = order.name;
+                        document.getElementById("editOrderEmail").value = order.email;
+                        document.getElementById("editOrderStatus").value = order.status;
+                        document.getElementById("editOrderTotalAmount").value = order.totalAmount;
+
+                        // Lưu orderId vào modal để gửi khi sửa
+                        document.getElementById("editOrderForm").dataset.orderId = orderId;
+                    })
+                    .catch(err => console.error("Lỗi khi lấy thông tin đơn hàng:", err));
+            }
+
+            // Lưu thông tin đơn hàng đã chỉnh sửa
+            function saveEditedOrder() {
+                const form = document.getElementById("editOrderForm");
+                const orderId = form.dataset.orderId;
+
+                const updatedOrder = {
+                    name: document.getElementById("editOrderName").value,
+                    email: document.getElementById("editOrderEmail").value,
+                    status: document.getElementById("editOrderStatus").value,
+                    totalAmount: document.getElementById("editOrderTotalAmount").value
+                };
+
+                // Gửi thông tin đã chỉnh sửa lên server
+                fetch(`/admin/orders/${orderId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updatedOrder)
+                })
+                    .then(res => {
+                        if (!res.ok) throw new Error("Không thể cập nhật thông tin đơn hàng.");
+                        return res.json();
+                    })
+                    .then(() => {
+                        alert("Thông tin đơn hàng đã được cập nhật.");
+                        closeEditOrderModal();
+                        loadOrders(); // Làm mới danh sách đơn hàng
+                    })
+                    .catch(err => console.error("Lỗi khi cập nhật đơn hàng:", err));
+            }
+
+            // Xóa đơn hàng
+            function deleteOrder(orderId) {
+                if (!confirm('Bạn có chắc muốn xóa đơn hàng này không?')) return;
+
+                fetch(`/admin/orders/${orderId}`, { method: 'DELETE' })
+                    .then(res => {
+                        if (!res.ok) throw new Error('Lỗi khi xóa đơn hàng.');
+                        return res.json();
+                    })
+                    .then(() => {
+                        alert('Đơn hàng đã được xóa.');
+                        loadOrders(); // Cập nhật lại danh sách
+                    })
+                    .catch(err => console.error(err));
+            }
+
+
+        // Đóng Modal Khi Bấm Nút "X"
+        closeButtons.forEach(button => {
+            button.onclick = function () {
+                addModal.style.display = "none";
+                editModal.style.display = "none";
+                commentModal.style.display = "none";
+                editUserModal.style.display = "none";
+                addUserModal.style.display = "none";
+                editOrderModal.style.display = "none";
+            };
+        });
+
+        // Đóng Modal Khi Nhấp Ra Ngoài Modal
+        window.onclick = function (event) {
+            if (event.target === addModal) addModal.style.display = "none";
+            if (event.target === editModal) editModal.style.display = "none";
+            if (event.target === commentModal) commentModal.style.display = "none";
+            if (event.target === editUserModal) editUserModal.style.display = "none";
+            if (event.target === addUserModal) addUserModal.style.display = "none";
+            if (event.target === editOrderModal) editOrderModal.style.display = "none";
+        };
+
+
+
+    </script>
+</body>
+
+</html>

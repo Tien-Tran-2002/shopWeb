@@ -1,0 +1,237 @@
+<%- include('partials/header') %>
+
+<div class="checkout-container">
+  <div class="checkout-left">
+
+    <!-- Giỏ hàng có thể thả xuống -->
+    <div class="cart-items-toggle" onclick="toggleCartItems()">
+      <span>Giỏ hàng (<%= cartItems.length %> sản phẩm)</span>
+      <span>&#9660;</span> <!-- Mũi tên chỉ xuống -->
+    </div>
+    <div class="cart-items-dropdown">
+      <% cartItems.forEach(item => { %>
+        <div class="cart-item">
+          <img src="<%= item.product.image %>" alt="<%= item.product.name %>">
+          <div>
+            <p><%= item.product.name %></p>
+            <p>Số lượng: <%= item.quantity %></p>
+            <p>Giá: <%= item.price.toLocaleString() %>₫</p>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+
+    <h2>Thông tin giao hàng</h2>
+    <form action="/checkout" method="POST" id="checkoutForm">
+      <input type="text" name="name" placeholder="Họ và tên" required>
+      <input type="email" name="email" placeholder="Email" required>
+      <input type="text" name="phone" placeholder="Số điện thoại" required>
+      <input type="text" name="address" placeholder="Địa chỉ" required>
+
+      <div class="address-select">
+        <select name="province" id="province" required>
+          <option value="">Chọn tỉnh / thành</option>
+          <option value="hcm">Hồ Chí Minh</option>
+          <option value="hanoi">Hà Nội</option>
+        </select>
+      
+        <select name="district" id="district" required>
+          <option value="">Chọn quận / huyện</option>
+        </select>
+      
+        <select name="ward" id="ward" required>
+          <option value="">Chọn phường / xã</option>
+        </select>
+      </div>
+      
+      <script>
+        const data = {
+          hcm: {
+            "Quận 1": ["Phường Bến Nghé", "Phường Bến Thành", "Phường Cầu Kho"],
+            "Quận 2": ["Phường Thảo Điền", "Phường An Phú", "Phường Bình Trưng Đông"],
+            "Quận 3": ["Phường Võ Thị Sáu", "Phường Ward 7", "Phường Ward 8"],
+            "Quận 4": ["Phường 1", "Phường 2", "Phường 3"],
+            "Quận 5": ["Phường 1", "Phường 2", "Phường 3"],
+            "Quận 6": ["Phường 1", "Phường 2", "Phường 3"],
+            "Quận 7": ["Phường Tân Phong", "Phường Tân Quy", "Phường Phú Mỹ"],
+            "Quận 8": ["Phường 1", "Phường 2", "Phường 3"],
+            "Quận 9": ["Phường Phước Long A", "Phường Phước Long B", "Phường Tăng Nhơn Phú A"]
+          },
+          hanoi: {
+            "Quận Ba Đình": ["Phường Phúc Xá", "Phường Trúc Bạch", "Phường Vĩnh Phúc"],
+            "Quận Hoàn Kiếm": ["Phường Chương Dương", "Phường Hàng Bạc", "Phường Hàng Bồ"],
+            "Quận Đống Đa": ["Phường Cát Linh", "Phường Văn Chương", "Phường Quốc Tử Giám"],
+            "Quận Hai Bà Trưng": ["Phường Bạch Đằng", "Phường Bùi Thị Xuân", "Phường Đống Mác"],
+            "Quận Cầu Giấy": ["Phường Dịch Vọng", "Phường Dịch Vọng Hậu", "Phường Nghĩa Đô"]
+          }
+        };
+      
+        const provinceSelect = document.getElementById('province');
+        const districtSelect = document.getElementById('district');
+        const wardSelect = document.getElementById('ward');
+      
+        provinceSelect.addEventListener('change', function () {
+          const province = this.value;
+          districtSelect.innerHTML = '<option value="">Chọn quận / huyện</option>';
+          wardSelect.innerHTML = '<option value="">Chọn phường / xã</option>';
+          if (province && data[province]) {
+            Object.keys(data[province]).forEach(district => {
+              const option = document.createElement('option');
+              option.value = district;
+              option.textContent = district;
+              districtSelect.appendChild(option);
+            });
+          }
+        });
+      
+        districtSelect.addEventListener('change', function () {
+          const province = provinceSelect.value;
+          const district = this.value;
+          wardSelect.innerHTML = '<option value="">Chọn phường / xã</option>';
+          if (province && district && data[province][district]) {
+            data[province][district].forEach(ward => {
+              const option = document.createElement('option');
+              option.value = ward;
+              option.textContent = ward;
+              wardSelect.appendChild(option);
+            });
+          }
+        });
+      </script>
+      
+
+      <h3>Phương thức vận chuyển</h3>
+      <p id="shippingFee">Vui lòng chọn tỉnh để tính phí vận chuyển</p>
+
+      <h3>Phương thức thanh toán</h3>
+      <div class="payment-methods">
+        <div class="payment-method">
+          <input type="radio" id="paymentCOD" name="paymentMethod" value="COD" checked>
+          <label for="paymentCOD">
+            <img src="https://caphenhan.vn/wp-content/uploads/2021/09/shutterstock_357538178-scaled-e1631362855952.jpg" alt="" style="height: 30px; width: auto;">
+            Thanh toán khi giao hàng (COD)</label>
+        </div>
+        <div class="payment-method">
+          <input type="radio" id="paymentMoMo" name="paymentMethod" value="MoMo">
+          <label for="paymentMoMo">
+            <img src="https://developers.momo.vn/v3/vi/assets/images/square-8c08a00f550e40a2efafea4a005b1232.png" alt="" style="height: 30px; width: auto;">
+            Ví MoMo</label>
+        </div>
+        <div class="payment-method">
+          <input type="radio" id="paymentATM" name="paymentMethod" value="ATM">
+          <label for="paymentATM">
+            <img src="https://vnpay.vn/s1/statics.vnpay.vn/2023/6/0oxhzjmxbksr1686814746087.png" alt="" style="height: 30px; width: auto;">
+            Thẻ ATM / Visa / Master / VNPAY</label>
+        </div>
+        <div class="payment-method">
+          <input type="radio" id="paymentShopeePay" name="paymentMethod" value="ShopeePay">
+          <label for="paymentShopeePay">
+            <img src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-ShopeePay-V.png" alt="" style="height: 25px; width: auto;">
+            Ví ShopeePay</label>
+        </div>
+      </div>
+
+      <style>
+        .payment-methods {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        .payment-method {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
+
+        .payment-method label {
+          flex: 7; /* Chiếm 70% bề ngang */
+          text-align: justify; /* Trải đều chữ trong label */
+        }
+
+        .payment-method input {
+          flex: 3; /* Chiếm 30% bề ngang */
+          margin-left: 10px;
+        }
+      </style>
+
+      <!-- thêm hidden input để JS có thể đọc amount -->
+      <input type="hidden" id="momoAmount" name="amount" value="<%= cartTotal %>">
+
+      <button type="submit" class="checkout-btn">Hoàn tất đơn hàng</button>
+
+    </form>
+  </div>
+
+  <div class="checkout-right">
+    <h2>Giỏ hàng</h2>
+
+    <div class="cart-items">
+        <% cartItems.forEach(item => { %>  <!-- Sử dụng cartItems thay vì cart -->
+          <div class="cart-item">
+            <img src="<%= item.product.image %>" alt="<%= item.product.name %>">
+            <div>
+              <p><%= item.product.name %></p>
+              <p>Số lượng: <%= item.quantity %></p>
+              <p>Giá: <%= item.price.toLocaleString() %>₫</p>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+      
+
+    <div class="cart-summary">
+      <p>Tạm tính: <strong><%= cartTotal.toLocaleString() %>₫</strong></p>
+      <p>Phí vận chuyển: <strong id="shippingFeeAmount">-</strong></p>
+      <p>Tổng cộng: <strong id="totalAmount"><%= cartTotal.toLocaleString() %>₫</strong></p>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>
+
+<!-- Thêm script trực tiếp ở đây -->
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Đọc giá trị cartTotal từ server dưới dạng number
+    const cartTotal = parseFloat("<%= cartTotal %>");
+
+    // Cập nhật ngay lần đầu
+    updateShippingFee(cartTotal);
+
+    // Khi thay đổi tỉnh/thành, tính lại phí ship và tổng, đồng thời cập nhật MoMo
+    document.getElementById('province').addEventListener('change', () => {
+      updateShippingFee(cartTotal);
+    });
+
+    // Xử lý toggle giỏ hàng
+    document.querySelector('.cart-items-toggle').addEventListener('click', toggleCartItems);
+  });
+
+  function updateShippingFee(cartTotal) {
+    const province = document.getElementById('province').value;
+    const shipFee = province ? 50000 : 0;
+
+    // Hiển thị phí ship
+    document.getElementById('shippingFeeAmount').textContent =
+      province ? shipFee.toLocaleString() + '₫' : '-';
+
+    // Tính tổng = cartTotal + shipFee
+    const total = cartTotal + shipFee;
+
+    // Hiển thị tổng
+    document.getElementById('totalAmount').textContent =
+      total.toLocaleString() + '₫';
+
+    // Cập nhật hidden input cho MoMo
+    document.getElementById('momoAmount').value = total;
+  }
+
+  function toggleCartItems() {
+    document.querySelector('.cart-items-dropdown').classList.toggle('open');
+  }
+</script>
+
+
+</body>
+</html>

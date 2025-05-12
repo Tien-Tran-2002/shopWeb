@@ -1,0 +1,101 @@
+.rating {
+    font-size: 20px; /* Kích thước sao */
+}
+
+.star {
+    color: #d3d3d3; /* Màu xám cho sao rỗng */
+    display: inline-block;
+}
+
+.star.filled {
+    color: #ffd700; /* Màu vàng cho sao đầy */
+}
+
+.star.half {
+    color: transparent; /* Màu trong suốt cho nửa sao */
+    background: linear-gradient(90deg, #ffd700 50%, #d3d3d3 50%); /* Màu vàng cho nửa sao */
+    -webkit-background-clip: text;
+    background-clip: text;
+}
+
+/* Đảm bảo sao rỗng có màu xám */
+.star:before {
+    content: "\2605"; /* Mã unicode của ngôi sao đầy */
+    position: absolute;
+    color: #d3d3d3; /* Sao rỗng sẽ có màu xám */
+}
+
+.star.filled:before {
+    color: #ffd700; /* Sao đầy sẽ có màu vàng */
+}
+
+.star.half:before {
+    color: transparent;
+    background: linear-gradient(90deg, #ffd700 50%, #d3d3d3 50%); /* Màu vàng cho nửa sao */
+    -webkit-background-clip: text;
+    background-clip: text;
+}
+
+
+/* Footer luôn ở dưới cùng của trang */
+.footer {
+    display: flex;
+    position: relative;
+    bottom: 0;
+    width: 100%;
+    background-color: #f8f8f8;
+    padding: 20px 0;
+    text-align: center;
+}
+
+/* Nếu nội dung ngắn, footer vẫn ở dưới cùng */
+body, html {
+    height: 100%;
+}
+
+.container {
+    min-height: 100%;
+    padding-bottom: 60px; /* Đảm bảo khoảng cách giữa nội dung và footer */
+}
+
+.sticky-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 9999;
+    background-color: white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+body {
+    padding-top: 180px; /* điều chỉnh tùy độ cao header thực tế */
+}
+
+.col-md-3 {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.thumbnail {
+    flex: 1; /* Đảm bảo các box kéo dài đầy đủ chiều cao */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 15px;
+    background-color: #f9f9f9;
+    height: 100%; /* Cân đối chiều cao */
+}
+
+.price {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    font-size: 16px;
+    color: #d10000;
+    font-weight: bold;
+    text-decoration: none;
+}

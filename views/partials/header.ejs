@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <title>My Shop</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css?family=Raleway:300" rel="stylesheet">
+    <link rel="stylesheet" href="/stylesheets/style.css">
+    <link rel="stylesheet" href="/stylesheets/main.css">
+    <link rel="stylesheet" href="/stylesheets/responsive.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<style>
+    .search-item p {
+        margin: 0px;
+        padding: 0px;
+    }
+</style>
+
+<body>
+    <div class="sticky-wrapper">
+        <div class="header">
+            <i class="fa fa-bell custom-icon"></i> MIỄN PHÍ VẬN CHUYỂN ĐƠN HÀNG TỪ 299K
+        </div>
+
+        <!--Navbar dành riêng cho moblie-->
+        <nav class="navbar-mobile">
+            <div class="container-fluid">
+                <div class="navbar-logo-container">
+                    <a href="/" class="navbar-brand">
+                        <img src="/img/logo.png" alt="John Henry" class="navbar-logo">
+                    </a>
+
+                    <div class="navbar-icons-container">
+                        <ul class="nav navbar-nav navbar-right">
+                            <li><a href="#"><i class="fa fa-map-marker"></i></a></li>
+                            <li><a href="#" id="login-moblie"><i class="fa fa-user"></i></a></li>
+                            <li>
+                                <a href="/cart/view" id="cart-icon">
+                                    <i class="fa fa-shopping-cart"></i>
+                                    <span class="cart-count">
+                                        <%= cartItems.length %>
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Modal đăng nhập -->
+                    <div id="login-modal" class="login-modal">
+                        <div class="login-modal-content">
+                            <span class="close">&times;</span>
+
+                            <% if (!user) { %>
+                                <div class="login-content">
+                                    <h3>ĐĂNG NHẬP TÀI KHOẢN</h3>
+
+                                    <% if (error_msg && error_msg.length) { %>
+                                        <div class="alert alert-danger">
+                                            <%= error_msg[0] %>
+                                        </div>
+                                        <% } %>
+
+                                            <% if (success_msg && success_msg.length) { %>
+                                                <div class="alert alert-success">
+                                                    <%= success_msg[0] %>
+                                                </div>
+                                                <% } %>
+
+                                                    <form action="/auth/login" method="POST">
+                                                        <div class="form-group">
+                                                            <label for="username">Tên đăng nhập</label>
+                                                            <input type="text" id="username" name="username"
+                                                                class="form-control" placeholder="Tên đăng nhập">
+                                                        </div>
+
+                                                        <div class="form-group">
+                                                            <label for="password">Mật khẩu</label>
+                                                            <input type="password" id="password" name="password"
+                                                                class="form-control" placeholder="Mật khẩu">
+                                                        </div>
+
+                                                        <button type="submit" class="btn btn-primary btn-block">ĐĂNG
+                                                            NHẬP</button>
+                                                    </form>
+
+                                                    <p>Khách hàng mới? <a href="/auth/register">Tạo tài khoản</a></p>
+                                </div>
+                                <% } else { %>
+                                    <% if (user.picture) { %>
+                                        <img src="<%= user.picture %>" class="nav-facebook-img"
+                                            style="height:30px; border-radius:50%">
+                                        <% } %>
+                                            <a href="#">
+                                                <%= user.name || user.username %>
+                                            </a> | <a href="/auth/logout">Đăng xuất</a>
+                                            <% } %>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="navbar-toggle" id="navbar-toggle">
+                    <i class="fa fa-bars"></i>
+                </div>
+            </div>
+            <div class="navbar-menu" id="navbar-menu">
+                <ul>
+                    <li><a href="#">NEW COLLECTION</a></li>
+                    <li><a href="#">KHUYẾN MẠI</a></li>
+                    <li><a href="#">JOHN HENRY</a></li>
+                    <li><a href="#">FREELANCER</a></li>
+                    <li><a href="#">BLOG</a></li>
+                    <li><a href="#">CỬA HÀNG</a></li>
+                    <li><a href="#">UNIFORMPRO</a></li>
+                </ul>
+            </div>
+        </nav>
+
+        <!--Navbar cho Web-->
+        <nav class="navbar custom-navbar">
+            <div class="container-fluid">
+                <div class="navbar-row1">
+                    <div class="navbar-logo-container">
+                        <a href="/" class="navbar-brand">
+                            <img src="/img/logo.png" alt="John Henry" class="navbar-logo">
+                        </a>
+                    </div>
+                    <!--Thanh Search cho Web-->
+                    <div class="navbar-search-container">
+                        <form method="GET" action="/" class="search-form">
+                            <div class="form-group" style="position: relative;">
+                                <input id="searchInput" name="keyword" class="form-control search-input" type="search"
+                                    placeholder="Áo thun nam" aria-label="Search" autocomplete="off">
+
+                                <div id="searchDropdown" class="dropdown-menu list-group"
+                                    style="max-height: 300px; overflow-y: auto; position: absolute; z-index: 200; width: 100%; scrollbar-width: none;">
+                                    <!-- Kết quả tìm kiếm sẽ được chèn vào đây -->
+                                </div>
+                            </div>
+
+                        </form>
+                    </div>
+                    <div class="navbar-icons-container">
+                        <ul class="nav navbar-nav navbar-right">
+                            <li><a href="#"><i class="fa fa-map-marker"></i></a></li>
+                            <li><a href="#" id="login-icon"><i class="fa fa-user"></i></a></li>
+                            <li>
+                                <a href="/cart/view" id="cart-icon">
+                                    <i class="fa fa-shopping-cart"></i>
+                                    <span class="cart-count">
+                                        <%= cartItems.length %>
+                                    </span>
+                                </a>
+                            </li>
+
+                        </ul>
+                    </div>
+
+                    <div id="login-block" class="login-block">
+                        <% if (!user) { %>
+                            <div class="login-content">
+                                <h3>ĐĂNG NHẬP TÀI KHOẢN</h3>
+                                <% if (error_msg && error_msg.length) { %>
+                                    <div class="alert alert-danger">
+                                        <%= error_msg[0] %>
+                                    </div>
+                                    <% } %>
+                                        <% if (success_msg && success_msg.length) { %>
+                                            <div class="alert alert-success">
+                                                <%= success_msg[0] %>
+                                            </div>
+                                            <% } %>
+                                                <form action="/auth/login" method="POST">
+                                                    <div class="form-group">
+                                                        <label for="username">Tên đăng nhập</label>
+                                                        <input type="text" id="username" name="username"
+                                                            class="form-control" placeholder="Tên đăng nhập">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="password">Mật khẩu</label>
+                                                        <input type="password" id="password" name="password"
+                                                            class="form-control" placeholder="Mật khẩu">
+                                                    </div>
+                                                    <button type="submit" class="btn btn-primary btn-block">ĐĂNG
+                                                        NHẬP</button>
+                                                </form>
+                                                <p>Khách hàng mới? <a href="/auth/register">Tạo tài khoản</a></p>
+                            </div>
+                            <% } else { %>
+                                <% if (user.picture) { %>
+                                    <img src="<%= user.picture %>" class="nav-facebook-img"
+                                        style="height:30px; border-radius:50%">
+                                    <% } %>
+                                        <a href="#">
+                                            <%= user.name || user.username %>
+                                        </a> | <a href="/auth/logout">Đăng xuất</a>
+                                        <% } %>
+                    </div>
+                </div>
+
+
+                <div class="navbar-row2">
+                    <ul class="nav navbar-nav">
+                        <li><a href="#">NEW COLLECTION <i class="fa fa-caret-down"></i></a></li>
+                        <li><a href="#">KHUYẾN MẠI <i class="fa fa-caret-down"></i></a></li>
+                        <li><a href="#">JOHN HENRY <i class="fa fa-caret-down"></i></a></li>
+                        <li><a href="#">FREELANCER <i class="fa fa-caret-down"></i></a></li>
+                        <li><a href="#">BLOG</a></li>
+                        <li><a href="/store">CỬA HÀNG</a></li>
+                        <li><a href="#">UNIFORMPRO</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </div>
+
+    <script>
+        const loginIcon = document.getElementById('login-icon');
+        const loginBlock = document.getElementById('login-block');
+        loginIcon.addEventListener('click', (e) => {
+            e.preventDefault();
+            loginBlock.style.display = loginBlock.style.display === 'block' ? 'none' : 'block';
+        });
+        document.addEventListener('click', (e) => {
+            if (!loginBlock.contains(e.target) && !loginIcon.contains(e.target)) {
+                loginBlock.style.display = 'none';
+            }
+        });
+
+        // Tạo sự kiện cho nút hamburger
+        const navbarToggle = document.getElementById('navbar-toggle');
+        const navbarMenu = document.getElementById('navbar-menu');
+
+        navbarToggle.addEventListener('click', () => {
+            // Chuyển đổi hiển thị menu khi nhấn nút hamburger
+            if (navbarMenu.style.display === 'block') {
+                navbarMenu.style.display = 'none';
+            } else {
+                navbarMenu.style.display = 'block';
+            }
+        });
+
+        const loginButton = document.getElementById("login-moblie");
+        const loginModal = document.getElementById("login-modal");
+        const closeButton = document.getElementsByClassName("close")[0];
+
+        // Kiểm tra sự kiện click
+        loginButton.addEventListener("click", function (e) {
+            e.preventDefault(); // Ngăn chặn hành động mặc định
+            console.log("Login button clicked!"); // Kiểm tra khi nào nhấp vào
+            loginModal.style.display = "block";
+        });
+
+        closeButton.addEventListener("click", function () {
+            loginModal.style.display = "none";
+        });
+
+        // Khi nhấp ra ngoài modal, ẩn modal
+        window.addEventListener("click", function (event) {
+            if (event.target === loginModal) {
+                loginModal.style.display = "none";
+            }
+        });
+
+        // Gọi API tìm kiếm
+        const searchInput = document.getElementById('searchInput');
+        const searchDropdown = document.getElementById('searchDropdown');
+
+        searchInput.addEventListener('input', async function () {
+            const keyword = this.value.trim();
+
+            if (keyword.length === 0) {
+                searchDropdown.classList.remove('show');
+                searchDropdown.innerHTML = '';
+                return;
+            }
+
+
+            try {
+                const response = await fetch(`/search?keyword=${encodeURIComponent(keyword)}`);
+                const results = await response.json();
+
+                if (results.length > 0) {
+                    searchDropdown.classList.add('show');
+                    searchDropdown.innerHTML = '';
+
+                    results.forEach(product => {
+                        const item = document.createElement('a');
+                        item.href = `/products/${product._id}`;
+                        item.className = 'dropdown-item d-flex align-items-center list-group-item list-group-item-action';
+
+                        item.innerHTML = `
+                            <div style="display: flex; align-items: center; gap: 20px;">
+                                <img src="${product.image}" alt="${product.name}" class="mr-2" style="width: 40px; height: 40px; object-fit: cover; border-radius: 5px;">
+                                <div class="search-item" style="color: black; display: flex; align-items: center; justify-content: space-between; width: 100%; border-radius: 5px;">
+                                    <p>${product.name}</p>
+                                    <p class="price">${(product.price).toLocaleString('vi-VN')}₫</p>    
+                                </div>
+                            </div>
+                        `;
+
+                        searchDropdown.appendChild(item);
+                    });
+                } else {
+                    searchDropdown.classList.remove('show');
+                    searchDropdown.innerHTML = '';
+                }
+            } catch (err) {
+                console.error('Lỗi tìm kiếm:', err);
+                searchDropdown.classList.remove('show');
+                searchDropdown.innerHTML = '';
+            }
+        });
+
+        // Nếu click bên ngoài ô tìm kiếm thì ẩn dropdown
+        document.addEventListener('click', function (event) {
+            if (!searchInput.contains(event.target)) {
+                searchDropdown.classList.remove('show');
+            }
+        });
+
+    </script>

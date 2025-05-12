@@ -1,0 +1,65 @@
+<%- include('partials/header') %>
+
+  <Style>
+    .checkout-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 80vh;
+      background-color: #f9f9f9;
+      padding: 20px;
+    }
+
+    .checkout-content {
+      background: #fff;
+      padding: 40px 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      max-width: 600px;
+      width: 100%;
+    }
+
+    .checkout-text h1 {
+      font-size: 32px;
+      margin-bottom: 16px;
+      color: #333;
+    }
+
+    .checkout-text p {
+      font-size: 18px;
+      color: #666;
+      margin-bottom: 30px;
+    }
+
+    .checkout-btn {
+      display: inline-block;
+      padding: 14px 28px;
+      background-color: #007bff;
+      color: #fff;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 16px;
+      transition: background-color 0.3s ease;
+    }
+
+    .checkout-btn:hover {
+      background-color: #0056b3;
+    }
+  </Style>
+
+  <div class="checkout-container">
+    <div class="checkout-content">
+      <div class="checkout-text">
+        <h1>Cảm ơn bạn đã đặt hàng!</h1>
+        <p>Chúng tôi sẽ liên hệ với bạn sớm nhất để xác nhận đơn hàng.</p>
+      </div>
+      <a href="/" class="checkout-btn">Quay về trang chủ</a>
+    </div>
+  </div>
+
+  <%- include('partials/footer') %>
+    <%- include('./partials/closingtags') %>
+      </body>
+
+      </html>

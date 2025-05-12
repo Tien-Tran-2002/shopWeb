@@ -1,0 +1,241 @@
+<!-- views/product-detail.ejs -->
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= product.name %> - Chi tiết sản phẩm
+    </title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/stylesheets/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <Style>
+        .form-group .rating {
+            direction: rtl;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .form-group .rating label {
+            display: inline-block;
+            cursor: pointer;
+            color: #ebebeb;
+        }
+
+        .form-group .rating label i {
+            font-size: 3rem;
+            transition: 0.1s ease-in;
+        }
+
+        .rating label:hover~label i,
+        .rating label:hover i {
+            color: #ffea4e;
+            /* Màu khi hover */
+        }
+
+        .form-group .rating .rating-radio {
+            display: none;
+        }
+
+        .form-group .rating input[type="radio"]:checked+label i,
+        .form-group .rating input[type="radio"]:checked~label i {
+            color: #ffea4e;
+        }
+
+        .container {
+            padding-top: 30px;
+        }
+
+        .product-detail {
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            /* << thêm dòng này để căn giữa */
+            gap: 30px;
+            padding-bottom: 30px;
+            padding-left: 100px;
+        }
+
+        .product-image img {
+            width: 100%;
+            max-width: 400px;
+            /* Giữ hình nhỏ gọn */
+            height: auto;
+            border-radius: 10px;
+        }
+
+        .product-info {
+            flex: 1;
+            max-width: 500px;
+            /* Không cho phần chữ quá rộng */
+            text-align: left;
+            /* Nội dung bên trong vẫn căn trái */
+            padding-left: 50px;
+        }
+
+        .product-info h2 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .product-info p {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .rating {
+            margin-top: 10px;
+        }
+
+        .price original-price,
+        .price sale-price,
+        .price {
+            position: static !important;
+        }
+    </Style>
+</head>
+
+<body>
+    <%- include('partials/header') %>
+        <!-- Nội dung chi tiết sản phẩm -->
+        <div class="container">
+            <div class="product-detail">
+                <div class="product-image">
+                    <img src="<%= product.image %>" alt="<%= product.name %>" class="img-responsive">
+                </div>
+                <div class="product-info">
+                    <h2>
+                        <%= product.name %>
+                    </h2>
+                    <p><strong>Mô tả:</strong>
+                        <%= product.description %>
+                    </p>
+                    <!-- Hiển thị giá -->
+                    <% if (product.saleprice) { %> <!-- Nếu có saleprice -->
+                        <!-- Giá gốc -->
+                        <div style="display: flex;align-items: center">
+                            <div class="price original-price"
+                                style="font-size: 12px; color: gray; text-decoration: line-through;bottom: 30px; padding-right: 10px;">
+                                <%= (product.price).toLocaleString('vi-VN') %> ₫
+                            </div>
+
+                            <!-- Giá khuyến mãi -->
+                            <div class="price sale-price">
+                                <%= (product.saleprice).toLocaleString('vi-VN') %> ₫
+                            </div>
+
+                        </div>
+                        <% } else { %> <!-- Nếu không có saleprice -->
+                            <!-- Hiển thị giá bình thường -->
+                            <div class="price">
+                                <%= (product.price).toLocaleString('vi-VN') %> ₫
+                            </div>
+                            <% } %>
+
+                                <br>
+                                <form action="/cart/order" method="POST">
+                                    <input type="hidden" name="itemId" value="<%= product._id %>">
+                                    <div class="form-group">
+                                        <label for="quantity">Số lượng:</label>
+                                        <input type="number" name="quantity" value="1" min="1" required>
+                                    </div>
+
+                                    <div class="rating">
+                                        <% for (let i=0; i < Math.floor(product.rating); i++) { %>
+                                            <span class="star filled">&#9733;</span>
+                                            <% } %>
+                                                <% if (product.rating % 1 !==0) { %>
+                                                    <span class="star half">&#9733;</span>
+                                                    <% } %>
+                                                        <% for (let i=Math.ceil(product.rating); i < 5; i++) { %>
+                                                            <span class="star">&#9734;</span>
+                                                            <% } %>
+                                    </div>
+                                    <br>
+                                    <button type="submit" class="btn btn-primary">Đặt hàng</button>
+                                </form>
+
+
+                </div>
+            </div>
+            <div>
+                <div>
+                    <% if (user) { %>
+                        <!-- Form đánh giá -->
+                        <form action="/products/<%= product._id %>/review" method="POST">
+                            <h4>Đánh giá sản phẩm</h4>
+                            <div class="form-group">
+                                <div class="rating">
+                                    <input type="radio" name="rating" value="5" id="star-1" class="rating-radio">
+                                    <label for="star-1"><i class="fa-solid fa-star"></i></label>
+
+                                    <input type="radio" name="rating" value="4" id="star-2" class="rating-radio">
+                                    <label for="star-2"><i class="fa-solid fa-star"></i></label>
+
+                                    <input type="radio" name="rating" value="3" id="star-3" class="rating-radio">
+                                    <label for="star-3"><i class="fa-solid fa-star"></i></label>
+
+                                    <input type="radio" name="ratinFg" value="2" id="star-4" class="rating-radio">
+                                    <label for="star-4"><i class="fa-solid fa-star"></i></label>
+
+                                    <input type="radio" name="rating" value="1" id="star-5" class="rating-radio">
+                                    <label for="star-5"><i class="fa-solid fa-star"></i></label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Bình luận:</label>
+                                <textarea name="comment" class="form-control" rows="3" required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Gửi đánh giá</button>
+                        </form>
+                        <% } else { %>
+                            <p>Hãy <a href="/auth/login">đăng nhập</a> để gửi đánh giá.</p>
+                            <% } %>
+
+                                <!-- Hiển thị các đánh giá -->
+                                <hr>
+                                <h4>Đánh giá từ người dùng</h4>
+                                <% comments.forEach(comment=> { %>
+                                    <div class="review">
+                                        <strong>
+                                            <%= comment.username %>
+                                        </strong>
+                                        <!-- Hiển thị sao đánh giá -->
+                                        <div class="rating">
+                                            <% for (let i=0; i < Math.floor(comment.rating); i++) { %>
+                                                <span class="star filled">&#9733;</span> <!-- Sao đầy -->
+                                                <% } %>
+
+                                                    <% if (comment.rating % 1 !==0) { %>
+                                                        <span class="star half">&#9733;</span> <!-- Nửa sao -->
+                                                        <% } %>
+
+                                                            <% for (let i=Math.ceil(comment.rating); i < 5; i++) { %>
+                                                                <span class="star">&#9734;</span> <!-- Sao rỗng -->
+                                                                <% } %>
+                                        </div>
+                                        <p>
+                                            <%= comment.comment %>
+                                        </p>
+                                        <hr>
+                                    </div>
+                                    <% }) %>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container">
+                <p class="text-center">© 2025 My Shop. All Rights Reserved.</p>
+            </div>
+        </footer>
+
+        <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</body>
+<%- include('partials/footer') %>
+
+</html>

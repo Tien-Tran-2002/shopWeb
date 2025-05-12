@@ -1,0 +1,80 @@
+<%- include('partials/header') %>
+
+<div class="container cart-container">
+    <h2>Giỏ hàng của bạn</h2>
+
+    <% if (cartItems.length === 0) { %>
+        <p>Giỏ hàng đang trống.</p>
+    <% } else { %>
+        <% let total = 0; %>
+
+        <!-- Form Update riêng, không bao trùm toàn bộ -->
+        <form id="update-cart-form" action="/cart/update" method="POST"></form>
+
+        <% cartItems.forEach(item => {
+            if (!item.product) return;
+            const subtotal = item.product.price * item.quantity;
+            total += subtotal;
+        %>
+            <div class="cart-item">
+                <img src="<%= item.product.image %>" alt="<%= item.product.name %>">
+                <div>
+                    <h4><%= item.product.name %></h4>
+                    <p><%= item.product.description %></p>
+                    <p>Giá: <span><%= item.product.price.toLocaleString('vi-VN') %></span> ₫</p>
+
+                    <!-- Input số lượng liên kết với form update -->
+                    <div>
+                        <label for="qty-<%= item.product._id %>">Số lượng:</label>
+                        <input
+                            form="update-cart-form"
+                            type="number"
+                            id="qty-<%= item.product._id %>"
+                            name="quantities[<%= item.product._id %>]"
+                            value="<%= item.quantity %>"
+                            min="1"
+                            class="quantity-input"
+                            data-price="<%= item.product.price %>"
+                        >
+                    </div>
+
+                    <!-- Thành tiền động -->
+                    <p>Thành tiền: <span id="subtotal-<%= item.product._id %>"><%= (subtotal.toLocaleString('vi-VN')).toLocaleString('vi-VN') %></span> ₫</p>
+
+                    <!-- Form Xóa riêng, không lồng -->
+                    <form method="POST" action="/cart/remove/<%= item.product._id %>" style="display:inline-block;">
+                        <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
+                    </form>
+                </div>
+            </div>
+        <% }) %>
+
+        <!-- Nút Cập nhật cho form update -->
+        <!--  <button form="update-cart-form" type="submit" class="btn btn-primary">Cập nhật giỏ hàng</button>  -->
+
+        <div class="cart-summary">
+            <h4>Tổng cộng: <span id="total"><%= total.toLocaleString('vi-VN') %></span> ₫</h4>
+            <a href="/checkout" class="btn btn-success">Thanh toán</a>
+        </div>
+    <% } %>
+</div>
+
+<!-- Script cập nhật tự động subtotals và tổng -->
+<script>
+    const inputs = document.querySelectorAll('.quantity-input');
+    function updateTotals() {
+        let sum = 0;
+        inputs.forEach(input => {
+            const price = parseFloat(input.dataset.price);
+            const qty = parseInt(input.value) || 1;
+            const st = price * qty;
+            const subEl = document.getElementById('subtotal-' + input.id.split('-')[1]);
+            if (subEl) subEl.textContent = st.toLocaleString();
+            sum += st;
+        });
+        document.getElementById('total').textContent = sum.toLocaleString();
+    }
+    inputs.forEach(i => i.addEventListener('input', updateTotals));
+</script>
+
+<%- include('partials/footer') %>
